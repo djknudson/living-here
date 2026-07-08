@@ -1,0 +1,13 @@
+# ESPHome secrets — never commit real Wi-Fi / API keys
+fishbucket/esp32/secrets.yaml
+
+# ESPHome build artifacts
+esp32/.esphome/
+**/.esphome/
+
+# Python
+.venv/
+__pycache__/
+
+# macOS
+.DS_Store
