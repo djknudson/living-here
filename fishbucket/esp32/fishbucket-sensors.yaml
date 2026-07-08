@@ -70,7 +70,7 @@ sensor:
     id: water_temp
     name: "Water Temperature"
     resolution: 12
-    update_interval: 30s
+    update_interval: 10s
 
   # Raw ADC voltage from the TDS probe (diagnostic; feeds the ppm calc below).
   - platform: adc
@@ -88,10 +88,12 @@ sensor:
           window_size: 10
           send_every: 2
 
-  # Temperature-compensated TDS in ppm.
-  #   Vc = V / (1 + 0.02*(T-25))
-  #   EC = (133.42*Vc^3 - 255.86*Vc^2 + 857.39*Vc) * K
-  #   TDS = EC * 0.5
+  # Temperature-compensated TDS in ppm. Order matches the DFRobot GravityTDS
+  # library: the cubic runs on the RAW probe voltage, then the resulting EC is
+  # normalized to 25 C (conductivity rises ~2%/C), then EC -> ppm via the 0.5 factor.
+  #   EC   = (133.42*V^3 - 255.86*V^2 + 857.39*V) * K     # K = calibration gain
+  #   EC25 = EC / (1 + 0.02*(T-25))                       # normalize to 25 C
+  #   TDS  = EC25 * 0.5                                    # NaCl (442 would be ~0.7)
   - platform: template
     name: "Water TDS"
     id: water_tds
@@ -104,6 +106,7 @@ sensor:
       if (isnan(v)) return NAN;
       float t = id(water_temp).has_state() ? id(water_temp).state : 25.0;
       float k = id(tds_k).has_state() ? id(tds_k).state : 1.0;
-      float vc = v / (1.0 + 0.02 * (t - 25.0));
-      float tds = (133.42*vc*vc*vc - 255.86*vc*vc + 857.39*vc) * 0.5 * k;
+      float ec = (133.42*v*v*v - 255.86*v*v + 857.39*v) * k;
+      float ec25 = ec / (1.0 + 0.02 * (t - 25.0));
+      float tds = ec25 * 0.5;
       return tds < 0 ? 0 : tds;
