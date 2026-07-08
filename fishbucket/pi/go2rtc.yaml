@@ -1,0 +1,19 @@
+# Living Here / fishbucket — aquarium camera (Pi Camera Module 3, imx708)
+# Deployed to the Pi at /etc/go2rtc/go2rtc.yaml
+#
+# rpicam-vid uses the Pi 4 hardware H.264 encoder. This rpicam-apps build reports
+# libav:0, so we use the NATIVE --codec h264 to stdout; go2rtc auto-detects the
+# H.264 bitstream from the pipe. rpicam-vid runs on-demand (only while a consumer
+# is connected), so no CPU/power is spent when nobody is watching.
+streams:
+  aquarium:
+    - exec:rpicam-vid -t 0 --inline --nopreview --codec h264 --width 1280 --height 720 --framerate 15 --intra 15 -o -
+
+api:
+  listen: ":1984"      # web UI + API  -> http://10.0.10.38:1984
+rtsp:
+  listen: ":8554"      # rtsp://10.0.10.38:8554/aquarium  (Home Assistant pulls this)
+webrtc:
+  listen: ":8555"
+  candidates:
+    - 10.0.10.38:8555  # LAN candidate so direct browser WebRTC works

@@ -1,0 +1,16 @@
+[Unit]
+Description=go2rtc camera streamer (fishbucket aquarium)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fishbucket
+SupplementaryGroups=video render
+WorkingDirectory=/etc/go2rtc
+ExecStart=/usr/local/bin/go2rtc -config /etc/go2rtc/go2rtc.yaml
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

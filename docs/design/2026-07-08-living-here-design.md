@@ -48,10 +48,12 @@ SSH aliases live in `~/.ssh/config` (key: `~/.ssh/id_ed25519`).
   (`number`, HA-adjustable, persisted).
 - Secrets (`secrets.yaml`, git-ignored): Wi-Fi, API key, OTA/AP passwords.
 
-### 2. Pi camera stream (`fishbucket/pi/` — later)
-- `rpicam-vid` (Pi 4 hardware H.264) → go2rtc or MediaMTX systemd service on the Pi →
-  RTSP/WebRTC. Added to HA via Generic Camera; HA's bundled go2rtc serves low-latency
-  WebRTC to the dashboard. Not wired until the enclosure exists.
+### 2. Pi camera stream (`fishbucket/pi/`) — DEPLOYED
+- go2rtc systemd service on the Pi driving `rpicam-vid` (Pi 4 hardware H.264, native
+  codec — this rpicam-apps build reports libav:0). Serves RTSP :8554 / WebRTC :8555 /
+  web UI :1984, on-demand (encoder only runs while watched). Added to HA via Generic
+  Camera → `camera.fishbucket_camera`; HA's bundled go2rtc serves low-latency WebRTC to
+  the dashboard. Physical in-water placement awaits the waterproof enclosure.
 
 ### 3. Home Assistant (hub)
 - ESPHome integration adopts the node (enter the API encryption key once).
