@@ -55,9 +55,12 @@ SSH aliases live in `~/.ssh/config` (key: `~/.ssh/id_ed25519`).
   Camera → `camera.fishbucket_camera`; HA's bundled go2rtc serves low-latency WebRTC to
   the dashboard. Physical in-water placement awaits the waterproof enclosure.
 
-### 3. Home Assistant (hub)
-- ESPHome integration adopts the node (enter the API encryption key once).
-- Dashboard: temperature + TDS history, camera tile.
+### 3. Home Assistant (hub) — DEPLOYED
+- ESPHome integration adopted the node (API encryption key entered once).
+- Generic Camera integration → `camera.fishbucket_camera`.
+- **Living Here** dashboard (YAML mode): live camera, temp + TDS gauges, 24 h
+  trend graphs, sensor/calibration entities. Source in `homeassistant/dashboards/`.
+- HA-side setup documented in `homeassistant/README.md`.
 
 ## Wiring (Freenove ESP32 breakout)
 

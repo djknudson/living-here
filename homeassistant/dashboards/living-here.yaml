@@ -1,0 +1,55 @@
+# Living Here — Fishbucket aquarium dashboard (YAML mode)
+# Deployed on HA at /config/dashboards/living-here.yaml
+# Registered in /config/configuration.yaml under lovelace: dashboards: living-here.
+# Entities: ESP32 (ESPHome) sensor node + Pi camera.
+title: Living Here
+views:
+  - title: Fishbucket
+    path: fishbucket
+    icon: mdi:fishbowl-outline
+    cards:
+      - type: picture-entity
+        entity: camera.fishbucket_camera
+        name: Aquarium
+        camera_view: live
+        show_state: false
+
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.fishbucket_sensors_water_temperature
+            name: Water Temp
+            min: 50
+            max: 90
+            needle: true
+            severity: { green: 60, yellow: 78, red: 82 }
+          - type: gauge
+            entity: sensor.fishbucket_sensors_water_tds
+            name: TDS
+            min: 0
+            max: 500
+            needle: true
+            severity: { green: 0, yellow: 300, red: 450 }
+
+      - type: history-graph
+        title: Trends (24 h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.fishbucket_sensors_water_temperature
+            name: Water temperature
+          - entity: sensor.fishbucket_sensors_water_tds
+            name: Water TDS
+
+      - type: entities
+        title: Sensor node
+        show_header_toggle: false
+        entities:
+          - entity: sensor.fishbucket_sensors_water_temperature
+            name: Water temperature
+          - entity: sensor.fishbucket_sensors_water_tds
+            name: Water TDS
+          - entity: sensor.fishbucket_sensors_tds_sensor_voltage
+            name: TDS sensor voltage
+          - type: divider
+          - entity: number.fishbucket_sensors_tds_calibration_k
+            name: TDS calibration K
