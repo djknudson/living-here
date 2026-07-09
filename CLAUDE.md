@@ -34,8 +34,11 @@ shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
   ```
 - First-ever flash only: `--device /dev/cu.usbserial-0001` (USB).
 - Pins (Elegoo silkscreen = `D<gpio>`): DS18B20 data → **D4/GPIO4**, 3V3, GND;
-  TDS signal → **D34/GPIO34** (ADC1 — **ADC2 is dead when Wi-Fi is on**), VCC → **VIN (5V)**, GND.
+  TDS signal → **D34/GPIO34** (ADC1 — **ADC2 is dead when Wi-Fi is on**), VCC → **VIN (5V)**, GND;
+  BMP280 (I²C, `bmp280_i2c` @ 0x76): SDA → **D21/GPIO21**, SCL → **D22/GPIO22**, VCC → 3V3, GND.
 - BOJACK DS18B20 module has its **own pull-up** — don't add one.
+- **6-pin BMP280 gotcha:** `CSB` must be tied HIGH (3V3) for I²C or it stays in SPI mode
+  and the I²C scan shows "found no devices." `SDO` low = 0x76, high = 0x77.
 
 ### Pi camera — `fishbucket/pi/`
 - **go2rtc** systemd service driving `rpicam-vid`. Config `go2rtc.yaml`, unit `go2rtc.service`
@@ -51,7 +54,8 @@ shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
   `configuration.yaml` change → `ssh homeassistant 'ha core check && ha core restart'`
   (**always `ha core check` first** — bad config blocks startup).
 - Entity IDs: `sensor.fishbucket_sensors_water_temperature`, `...water_tds`,
-  `...tds_sensor_voltage`, `number.fishbucket_sensors_tds_calibration_k`, `camera.fishbucket_camera`.
+  `...tds_sensor_voltage`, `...air_temperature`, `...air_pressure`,
+  `number.fishbucket_sensors_tds_calibration_k`, `camera.fishbucket_camera`.
 
 ## Gotchas (things that cost time once)
 - **HAOS empty add-on store on first boot** → `ha supervisor repair` (or restart). "Check

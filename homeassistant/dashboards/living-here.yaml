@@ -37,11 +37,13 @@ views:
         entities:
           - entity: sensor.fishbucket_sensors_water_temperature
             name: Water temperature
+          - entity: sensor.fishbucket_sensors_air_temperature
+            name: Air temperature
           - entity: sensor.fishbucket_sensors_water_tds
             name: Water TDS
 
       - type: entities
-        title: Sensor node
+        title: In the tank
         show_header_toggle: false
         entities:
           - entity: sensor.fishbucket_sensors_water_temperature
@@ -53,3 +55,12 @@ views:
           - type: divider
           - entity: number.fishbucket_sensors_tds_calibration_k
             name: TDS calibration K
+
+      - type: entities
+        title: Outside the tank (BMP280)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.fishbucket_sensors_air_temperature
+            name: Air temperature
+          - entity: sensor.fishbucket_sensors_air_pressure
+            name: Air pressure

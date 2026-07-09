@@ -8,7 +8,8 @@ aquarium monitor for a backyard freshwater tub (goldfish). Prototype/testing.
 ```
   ESP32 (ESPHome)                          Pi 4 "fishbucket" (Camera Module 3)
   ├─ DS18B20 water temp → GPIO4 (D4)       └─ rpicam-vid → go2rtc → RTSP/WebRTC
-  └─ TDS probe → GPIO34 (D34), 5V(VIN)            │
+  ├─ TDS probe → GPIO34 (D34), 5V(VIN)            │
+  └─ BMP280 air temp/pressure → I²C D21/D22       │
         │  Wi-Fi "<ssid>", encrypted API           │  RTSP
         └──────────────┐            ┌────────────┘
                        ▼            ▼

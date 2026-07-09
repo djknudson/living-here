@@ -20,6 +20,7 @@ SSH aliases live in `~/.ssh/config` (key: `~/.ssh/id_ed25519`).
 - **Elegoo ESP-WROOM-32** dev board in a Freenove breakout, on USB to the Mac (first flash).
 - **BOJACK DS18B20** waterproof temp probe + 3-pin module (on-board 4.7 kΩ pull-up — no external resistor).
 - **HiLetgo TDS / conductivity sensor** = clone of DFRobot Gravity Analog TDS (SEN0244). Analog, 3.3–5.5 V in, 0–2.3 V out, 0–1000 ppm.
+- **MECCANIXITY BMP280** (6-pin I²C) — ambient air temp + barometric pressure OUTSIDE the tank. Added 2026-07-09.
 - **Raspberry Pi Camera Module 3** (imx708) on the Pi — to be dropped in the tub once a waterproof enclosure is built.
 
 ## Architecture
@@ -45,7 +46,8 @@ SSH aliases live in `~/.ssh/config` (key: `~/.ssh/id_ed25519`).
 - Native encrypted API → HA auto-discovers the node (no MQTT broker).
 - Entities: **Water Temperature** (`dallas_temp`, GPIO4), **Water TDS** (`ppm`,
   temperature-compensated), **TDS Sensor Voltage** (diagnostic), **TDS Calibration K**
-  (`number`, HA-adjustable, persisted).
+  (`number`, HA-adjustable, persisted), **Air Temperature** + **Air Pressure**
+  (`bmp280_i2c` @ 0x76 on GPIO21/22).
 - Secrets (`secrets.yaml`, git-ignored): Wi-Fi, API key, OTA/AP passwords.
 
 ### 2. Pi camera stream (`fishbucket/pi/`) — DEPLOYED
@@ -67,6 +69,7 @@ SSH aliases live in `~/.ssh/config` (key: `~/.ssh/id_ed25519`).
 ```
 DS18B20:  RED → 3V3    BLACK → GND    YELLOW(DATA) → GPIO4
 TDS:      VCC → 5V(VIN) GND → GND      A(signal)   → GPIO34
+BMP280:   VCC → 3V3     GND → GND      SDA → GPIO21, SCL → GPIO22  (CSB→3V3 for I2C)
 ```
 Rationale: GPIO34 is ADC1 + input-only (ADC2 is unusable with Wi-Fi on ESP32); TDS at 5 V
 tops out ~2.3 V, under the 3.3 V ADC ceiling at `attenuation: 12db`, so no divider is needed.

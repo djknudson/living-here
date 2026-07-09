@@ -48,6 +48,14 @@ one_wire:
     pin: GPIO4
     id: bus_a
 
+# --- I2C bus (BMP280 ambient temp + pressure, OUTSIDE the tank) ---
+# ESP32 default I2C pins. scan:true logs detected addresses on boot so we can
+# confirm the BMP280 address (0x76 vs 0x77).
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
 # --- HA-facing calibration control for the TDS probe ---
 # After dropping the probe in a known solution (e.g. 707 ppm @ 25C),
 # adjust K until "Water TDS" matches the reference.
@@ -110,3 +118,16 @@ sensor:
       float ec25 = ec / (1.0 + 0.02 * (t - 25.0));
       float tds = ec25 * 0.5;
       return tds < 0 ? 0 : tds;
+
+  # BMP280 — ambient air OUTSIDE the tank (I2C). Pressure + air temperature.
+  # If the boot log's I2C scan shows 0x77 instead of 0x76, change address below.
+  - platform: bmp280_i2c
+    address: 0x76
+    update_interval: 10s
+    temperature:
+      name: "Air Temperature"
+      id: air_temp
+      oversampling: 16x
+    pressure:
+      name: "Air Pressure"
+      id: air_pressure
