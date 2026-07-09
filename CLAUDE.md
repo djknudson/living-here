@@ -13,6 +13,7 @@ trunk-based direct to `main`, atomic commits, "code like it ships").
 | `homeassistant` | 10.0.10.90 | HAOS 2026.7.1, Intel N97, 16 GB | `ssh homeassistant` (root, Terminal & SSH add-on) · web `:8123` (user `<ha-user>`) |
 | `fishbucket` | 10.0.10.38 | Raspberry Pi 4, Debian 13 (trixie), Camera Module 3 (imx708) | `ssh fishbucket` |
 | `fishbucket-sensors` | DHCP (was .67) | ESP32 (Elegoo ESP-WROOM-32) running ESPHome | HA native API + wireless OTA |
+| `sensordisplay` | 10.0.10.19 | Raspberry Pi Zero W (armv6, trixie), LAFVIN/Waveshare 2.13″ e-ink HAT | `ssh sensordisplay` |
 
 SSH aliases live in `~/.ssh/config` (identity `~/.ssh/id_ed25519`). The `ssh homeassistant`
 shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
@@ -46,6 +47,21 @@ shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
 - This rpicam-apps build reports **`libav:0`** → use native `--codec h264` (Pi 4 hardware
   encoder), NOT `--codec libav`. rpicam-vid runs **on-demand** (only while watched).
 - Test: <http://10.0.10.38:1984> (stream `aquarium`). Restart: `ssh fishbucket 'sudo systemctl restart go2rtc'`.
+
+### Pi Zero e-ink display — `sensordisplay/`
+- `dashboard.py` (deployed to `~/display/` on the Pi) fetches the 4 sensor states from
+  the **HA REST API** and renders a 250×122 1-bit image with Pillow → Waveshare
+  `epd2in13_V4` panel. Refresh loop = `sensordashboard.timer` (every 5 min; e-ink can't
+  full-refresh faster than ~3 min). Redeploy: copy `sensordisplay/` to the Pi, `bash setup.sh`.
+- **HA token** lives at `~/display/ha_token` (0600, git-ignored) — a long-lived token.
+  Install it without it hitting logs/repo: `pbpaste | ssh sensordisplay 'umask 077; cat > ~/display/ha_token'`.
+- Icons = **Material Design Icons webfont** (`@mdi/font@7.4.47`) rendered as glyphs via
+  `ImageFont.truetype` (crisp on 1-bit). Preview a render without the panel:
+  `python3 -c "import dashboard; dashboard.render(dashboard.fetch()).resize((750,366)).save('preview.png')"`
+  then `scp` it back and view — how I iterate on the look (I can't see the physical panel).
+- Gotchas: on **trixie the Waveshare lib uses gpiozero+lgpio+spidev** (all apt, no
+  RPi.GPIO/venv); try driver `epd2in13_V4`→V3→V2; the panel's **physical right edge clips
+  a few px before 250** (values are width-capped to 78px); `GPIO busy` → add `dtoverlay=spi0-0cs`.
 
 ### Home Assistant — `homeassistant/`
 - **Living Here** dashboard is **YAML mode** (`homeassistant/dashboards/living-here.yaml`,

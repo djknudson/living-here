@@ -1,0 +1,11 @@
+[Unit]
+Description=Fishbucket e-ink sensor dashboard (one refresh)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=sensordisplay
+SupplementaryGroups=spi gpio
+WorkingDirectory=/home/sensordisplay/display
+ExecStart=/usr/bin/python3 /home/sensordisplay/display/dashboard.py

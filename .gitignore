@@ -5,6 +5,12 @@ fishbucket/esp32/secrets.yaml
 esp32/.esphome/
 **/.esphome/
 
+# sensordisplay — HA token (secret) + fetched third-party assets (live on the Pi only)
+**/ha_token
+sensordisplay/waveshare_epd/
+sensordisplay/materialdesignicons-webfont.ttf
+sensordisplay/preview.png
+
 # Python
 .venv/
 __pycache__/
