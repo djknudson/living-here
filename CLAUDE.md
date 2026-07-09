@@ -82,6 +82,16 @@ shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
 - **TDS calibration** is a separate, optional step (the `number.…_tds_calibration_k` knob,
   K=1.0 uncalibrated). Temperature *compensation* is automatic via the DS18B20.
 - Temperatures display in **°F** (HA imperial unit system; ESPHome sends °C).
+- **Replaced the ESP32 board?** A new board has a new MAC + likely a new DHCP IP, so HA's
+  ESPHome config entry (keyed by the OLD mac, holding the OLD IP) won't auto-adopt it and the
+  sensor entities go 404/unavailable. Fix without the UI: with HA stopped, edit both `"host"`
+  (new IP) and `"unique_id"` (new MAC, lowercase) for the entry in
+  `/config/.storage/core.config_entries`, then `ha core start` + reload the entry
+  (`homeassistant.reload_config_entry`, `entry_id`). Matching unique_id→new MAC lets future IP
+  changes self-heal via mDNS. Canonical alternative: delete the dead entry and re-adopt the
+  rediscovered device (recreates the same entity_ids). A brownout boot-loop (flickering power
+  LED, `E BOD: Brownout detector was triggered`) = power/regulator, not firmware — swap cable →
+  wall charger → board.
 
 ## Current state / open items
 - ESP32 runs on a battery that has died a couple of times → readings go `unavailable`
