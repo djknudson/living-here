@@ -131,3 +131,10 @@ sensor:
     pressure:
       name: "Air Pressure"
       id: air_pressure
+      # HA's US unit system force-converts device_class:pressure to psi, so we
+      # report inHg directly and drop the device_class to stop the conversion.
+      device_class: ""
+      unit_of_measurement: "inHg"
+      accuracy_decimals: 2
+      filters:
+        - multiply: 0.02953   # hPa -> inHg

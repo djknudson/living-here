@@ -43,9 +43,9 @@ views:
           - type: gauge
             entity: sensor.fishbucket_sensors_air_pressure
             name: Air Pressure
-            # hPa range (BMP280 native unit). If HA shows inHg, switch to ~28.9–30.7.
-            min: 980
-            max: 1040
+            # inHg (firmware reports inHg directly; ~29.92 = standard sea level)
+            min: 28.5
+            max: 31.0
             needle: true
 
       - type: history-graph
