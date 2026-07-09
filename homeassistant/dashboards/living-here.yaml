@@ -2,82 +2,86 @@
 # Deployed on HA at /config/dashboards/living-here.yaml
 # Registered in /config/configuration.yaml under lovelace: dashboards: living-here.
 # Entities: ESP32 (ESPHome) sensor node + Pi camera.
+# Layout: two explicit columns — left = needle gauges + sensor tables, right = camera + trends.
 title: Living Here
 views:
   - title: Fishbucket
     path: fishbucket
     icon: mdi:fishbowl-outline
     cards:
-      - type: picture-entity
-        entity: camera.fishbucket_camera
-        name: Aquarium
-        camera_view: live
-        show_state: false
-
       - type: horizontal-stack
         cards:
-          - type: gauge
-            entity: sensor.fishbucket_sensors_water_temperature
-            name: Water Temp
-            min: 50
-            max: 90
-            needle: true
-            severity: { green: 60, yellow: 78, red: 82 }
-          - type: gauge
-            entity: sensor.fishbucket_sensors_water_tds
-            name: TDS
-            min: 0
-            max: 500
-            needle: true
-            severity: { green: 0, yellow: 300, red: 450 }
-
-      - type: horizontal-stack
-        cards:
-          - type: gauge
-            entity: sensor.fishbucket_sensors_air_temperature
-            name: Air Temp
-            min: 40
-            max: 110
-            needle: true
-            severity: { green: 40, yellow: 88, red: 98 }
-          - type: gauge
-            entity: sensor.fishbucket_sensors_air_pressure
-            name: Air Pressure
-            # inHg (firmware reports inHg directly; ~29.92 = standard sea level)
-            min: 28.5
-            max: 31.0
-            needle: true
-
-      - type: history-graph
-        title: Trends (24 h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.fishbucket_sensors_water_temperature
-            name: Water temperature
-          - entity: sensor.fishbucket_sensors_air_temperature
-            name: Air temperature
-          - entity: sensor.fishbucket_sensors_water_tds
-            name: Water TDS
-
-      - type: entities
-        title: In the tank
-        show_header_toggle: false
-        entities:
-          - entity: sensor.fishbucket_sensors_water_temperature
-            name: Water temperature
-          - entity: sensor.fishbucket_sensors_water_tds
-            name: Water TDS
-          - entity: sensor.fishbucket_sensors_tds_sensor_voltage
-            name: TDS sensor voltage
-          - type: divider
-          - entity: number.fishbucket_sensors_tds_calibration_k
-            name: TDS calibration K
-
-      - type: entities
-        title: Outside the tank (BMP280)
-        show_header_toggle: false
-        entities:
-          - entity: sensor.fishbucket_sensors_air_temperature
-            name: Air temperature
-          - entity: sensor.fishbucket_sensors_air_pressure
-            name: Air pressure
+          # ---------- LEFT column: all needle gauges together, then the tables ----------
+          - type: vertical-stack
+            cards:
+              - type: horizontal-stack
+                cards:
+                  - type: gauge
+                    entity: sensor.fishbucket_sensors_water_temperature
+                    name: Water Temp
+                    min: 50
+                    max: 90
+                    needle: true
+                    severity: { green: 60, yellow: 78, red: 82 }
+                  - type: gauge
+                    entity: sensor.fishbucket_sensors_water_tds
+                    name: TDS
+                    min: 0
+                    max: 500
+                    needle: true
+                    severity: { green: 0, yellow: 300, red: 450 }
+              - type: horizontal-stack
+                cards:
+                  - type: gauge
+                    entity: sensor.fishbucket_sensors_air_temperature
+                    name: Air Temp
+                    min: 40
+                    max: 110
+                    needle: true
+                    severity: { green: 40, yellow: 88, red: 98 }
+                  - type: gauge
+                    entity: sensor.fishbucket_sensors_air_pressure
+                    name: Air Pressure
+                    # inHg (firmware reports inHg directly; ~29.92 = standard sea level)
+                    min: 28.5
+                    max: 31.0
+                    needle: true
+              - type: entities
+                title: In the tank
+                show_header_toggle: false
+                entities:
+                  - entity: sensor.fishbucket_sensors_water_temperature
+                    name: Water temperature
+                  - entity: sensor.fishbucket_sensors_water_tds
+                    name: Water TDS
+                  - entity: sensor.fishbucket_sensors_tds_sensor_voltage
+                    name: TDS sensor voltage
+                  - type: divider
+                  - entity: number.fishbucket_sensors_tds_calibration_k
+                    name: TDS calibration K
+              - type: entities
+                title: Outside the tank (BMP280)
+                show_header_toggle: false
+                entities:
+                  - entity: sensor.fishbucket_sensors_air_temperature
+                    name: Air temperature
+                  - entity: sensor.fishbucket_sensors_air_pressure
+                    name: Air pressure
+          # ---------- RIGHT column: live camera + trend graph ----------
+          - type: vertical-stack
+            cards:
+              - type: picture-entity
+                entity: camera.fishbucket_camera
+                name: Aquarium
+                camera_view: live
+                show_state: false
+              - type: history-graph
+                title: Trends (24 h)
+                hours_to_show: 24
+                entities:
+                  - entity: sensor.fishbucket_sensors_water_temperature
+                    name: Water temperature
+                  - entity: sensor.fishbucket_sensors_air_temperature
+                    name: Air temperature
+                  - entity: sensor.fishbucket_sensors_water_tds
+                    name: Water TDS
