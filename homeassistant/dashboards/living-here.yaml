@@ -31,6 +31,23 @@ views:
             needle: true
             severity: { green: 0, yellow: 300, red: 450 }
 
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.fishbucket_sensors_air_temperature
+            name: Air Temp
+            min: 40
+            max: 110
+            needle: true
+            severity: { green: 40, yellow: 88, red: 98 }
+          - type: gauge
+            entity: sensor.fishbucket_sensors_air_pressure
+            name: Air Pressure
+            # hPa range (BMP280 native unit). If HA shows inHg, switch to ~28.9–30.7.
+            min: 980
+            max: 1040
+            needle: true
+
       - type: history-graph
         title: Trends (24 h)
         hours_to_show: 24
