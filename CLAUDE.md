@@ -12,11 +12,18 @@ trunk-based direct to `main`, atomic commits, "code like it ships").
 |------|-----|-----------|----------|
 | `homeassistant` | 10.0.10.90 | HAOS 2026.7.1, Intel N97, 16 GB | `ssh homeassistant` (root, Terminal & SSH add-on) · web `:8123` (user `<ha-user>`) |
 | `fishbucket` | 10.0.10.38 | Raspberry Pi 4, Debian 13 (trixie), Camera Module 3 (imx708) | `ssh fishbucket` |
-| `fishbucket-sensors` | DHCP (was .67) | ESP32 (Elegoo ESP-WROOM-32) running ESPHome | HA native API + wireless OTA |
+| `fishbucket-sensors` | 10.0.10.173 (DHCP — reserve it) | ESP32 (Elegoo ESP-WROOM-32) running ESPHome | HA native API + wireless OTA |
 | `sensordisplay` | 10.0.10.19 | Raspberry Pi Zero W (armv6, trixie), LAFVIN/Waveshare 2.13″ e-ink HAT | `ssh sensordisplay` |
 
 SSH aliases live in `~/.ssh/config` (identity `~/.ssh/id_ed25519`). The `ssh homeassistant`
-shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
+shell is the add-on container: `/config` + the `ha` CLI (not the host OS). `sensordisplay` accepts
+**both key and password** auth (user `sensordisplay` / password stored in password manager — NOT committed) — password login is re-enabled
+by a drop-in `/etc/ssh/sshd_config.d/01-enable-password.conf` (`PasswordAuthentication yes`) that
+overrides cloud-init's `50-cloud-init.conf`; sshd honors the *first* match, so the `01-` file wins.
+
+**DHCP reservations (set these on the router):** pin `sensordisplay` (wlan0 `b8:27:eb:xx:xx:xx`) →
+10.0.10.19 and `fishbucket-sensors` (ESP32 `xx:xx:xx:xx:xx:xx`) → 10.0.10.173, so a reboot never
+hands them a new IP — which is what knocks the e-ink dashboard and HA's ESPHome entities offline.
 
 ## Data flow
 `ESP32 (DS18B20 + TDS) --Wi-Fi/encrypted ESPHome API--> HA`
@@ -62,6 +69,14 @@ shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
 - Gotchas: on **trixie the Waveshare lib uses gpiozero+lgpio+spidev** (all apt, no
   RPi.GPIO/venv); try driver `epd2in13_V4`→V3→V2; the panel's **physical right edge clips
   a few px before 250** (values are width-capped to 78px); `GPIO busy` → add `dtoverlay=spi0-0cs`.
+- **Headless recovery (off-network, no keyboard):** on this Pi Zero W + trixie, FAT-partition
+  access tricks all fail — USB-ethernet/serial gadgets never bring up a link, and a
+  `systemd.run=` boot hook isn't honored (it runs before `/boot/firmware` mounts → silent, empty
+  log). Don't chase them. Reliable fix = **reflash** via Raspberry Pi Imager OS-customization
+  (WiFi `<ssid>`, SSH = your `authorized_keys` **and** username/password, hostname `sensordisplay`),
+  then re-run `setup.sh` from this repo and reinstall the token (`pbpaste` one-liner). Reflash
+  regenerates the SSH host key → run `ssh-keygen -R sensordisplay && ssh-keygen -R 10.0.10.19` on
+  the Mac before reconnecting. Panel + full stack rebuild takes ~15 min; nothing is lost.
 
 ### Home Assistant — `homeassistant/`
 - **Living Here** dashboard is **YAML mode** (`homeassistant/dashboards/living-here.yaml`,
@@ -98,3 +113,5 @@ shell is the add-on container: `/config` + the `ha` CLI (not the host OS).
   until repowered (firmware auto-reconnects, no reflash needed).
 - TDS uncalibrated (fine for testing). Camera not yet in a waterproof enclosure.
 - No alerting/automations yet (out of scope for the prototype).
+- **Router DHCP reservations not yet set** — MAC→IP mappings documented above (Machines &
+  access); pin both so a reboot can't reshuffle IPs and take entities/dashboard offline.
