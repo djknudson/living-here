@@ -42,7 +42,8 @@ hands them a new IP — which is what knocks the e-ink dashboard and HA's ESPHom
   ```
 - First-ever flash only: `--device /dev/cu.usbserial-0001` (USB).
 - Pins (Elegoo silkscreen = `D<gpio>`): DS18B20 data → **D4/GPIO4**, 3V3, GND;
-  TDS signal → **D34/GPIO34** (ADC1 — **ADC2 is dead when Wi-Fi is on**), VCC → **VIN (5V)**, GND;
+  TDS signal → **D34/GPIO34** (ADC1 — **ADC2 is dead when Wi-Fi is on**), VCC → **3V3**, GND;
+  pH signal → **D35/GPIO35** (ADC1, input-only), VCC → **VIN (5V)**, GND;
   BMP280 (I²C, `bmp280_i2c` @ 0x76): SDA → **D21/GPIO21**, SCL → **D22/GPIO22**, VCC → 3V3, GND.
 - BOJACK DS18B20 module has its **own pull-up** — don't add one.
 - **6-pin BMP280 gotcha:** `CSB` must be tied HIGH (3V3) for I²C or it stays in SPI mode

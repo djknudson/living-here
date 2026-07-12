@@ -3,11 +3,13 @@
 #
 # Sensors:
 #   - BOJACK DS18B20 waterproof temp probe -> GPIO4 (1-Wire; module has its own pull-up)
-#   - HiLetgo/Gravity analog TDS probe      -> GPIO34 (ADC1, WiFi-safe), powered from 5V
+#   - HiLetgo/Gravity analog TDS probe      -> GPIO34 (ADC1, WiFi-safe), powered from 3.3V
+#   - Analog pH board (B08YZ4MN87/PH-4502C) -> GPIO35 (ADC1, WiFi-safe), powered from 5V(VIN)
 #
 # Wiring (Freenove ESP32 breakout):
 #   DS18B20:  RED->3V3   BLACK->GND   YELLOW(DATA)->GPIO4
-#   TDS:      VCC->5V(VIN) GND->GND    A(signal)->GPIO34
+#   TDS:      VCC->3V3     GND->GND    A(signal)->GPIO34
+#   pH:       VCC->5V(VIN) GND->GND    Po(signal)->GPIO35
 #
 # First flash is over USB; every flash after that is OTA over WiFi.
 
@@ -71,6 +73,32 @@ number:
     restore_value: true
     entity_category: config
 
+  # --- HA-facing two-point calibration for the pH probe ---
+  # Drop the probe in pH 7.0 buffer, read "pH Sensor Voltage", type it into
+  # the @7.0 knob; repeat with pH 4.0 into the @4.0 knob. No reflash needed.
+  - platform: template
+    name: "pH Cal Voltage @ 7.0"
+    id: ph_v7
+    optimistic: true
+    min_value: 0.0
+    max_value: 3.3
+    step: 0.001
+    initial_value: 2.50      # typical neutral output; overwrite after calibrating
+    restore_value: true
+    entity_category: config
+    unit_of_measurement: "V"
+  - platform: template
+    name: "pH Cal Voltage @ 4.0"
+    id: ph_v4
+    optimistic: true
+    min_value: 0.0
+    max_value: 3.3
+    step: 0.001
+    initial_value: 3.00      # placeholder until you calibrate
+    restore_value: true
+    entity_category: config
+    unit_of_measurement: "V"
+
 sensor:
   # Water temperature. `address:` is optional with a single probe on the bus.
   - platform: dallas_temp
@@ -118,6 +146,45 @@ sensor:
       float ec25 = ec / (1.0 + 0.02 * (t - 25.0));
       float tds = ec25 * 0.5;
       return tds < 0 ? 0 : tds;
+
+  # Raw ADC voltage from the pH board (diagnostic; also the value you read
+  # during calibration while the probe sits in a buffer solution).
+  - platform: adc
+    pin: GPIO35
+    id: ph_voltage
+    name: "pH Sensor Voltage"
+    unit_of_measurement: "V"
+    accuracy_decimals: 3
+    attenuation: 12db
+    samples: 20
+    update_interval: 10s
+    entity_category: diagnostic
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 2
+
+  # Calibrated pH via a two-point linear fit. Robust to board polarity:
+  # both cal points are measured, so the slope sign is handled automatically.
+  #   pH = 7.0 + (V - V7) * (4.0 - 7.0) / (V4 - V7)
+  - platform: template
+    name: "Water pH"
+    id: water_ph
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    state_class: measurement
+    update_interval: 10s
+    lambda: |-
+      float v = id(ph_voltage).state;
+      if (isnan(v)) return NAN;
+      float v7 = id(ph_v7).has_state() ? id(ph_v7).state : 2.50;
+      float v4 = id(ph_v4).has_state() ? id(ph_v4).state : 3.00;
+      float denom = v4 - v7;
+      if (denom > -1e-4 && denom < 1e-4) return NAN;   // guard: uncalibrated / equal points
+      float ph = 7.0 + (v - v7) * (4.0 - 7.0) / denom;
+      if (ph < 0) ph = 0;
+      if (ph > 14) ph = 14;
+      return ph;
 
   # BMP280 — ambient air OUTSIDE the tank (I2C). Pressure + air temperature.
   # If the boot log's I2C scan shows 0x77 instead of 0x76, change address below.
