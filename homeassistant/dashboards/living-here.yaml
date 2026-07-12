@@ -46,6 +46,14 @@ views:
                     min: 28.5
                     max: 31.0
                     needle: true
+              - type: gauge
+                entity: sensor.fishbucket_sensors_water_ph
+                name: Water pH
+                min: 0
+                max: 14
+                needle: true
+                # No severity: pH is a two-sided ideal (both low and high are bad),
+                # which a one-direction gauge coloring can't express honestly.
               - type: entities
                 title: In the tank
                 show_header_toggle: false
@@ -56,9 +64,17 @@ views:
                     name: Water TDS
                   - entity: sensor.fishbucket_sensors_tds_sensor_voltage
                     name: TDS sensor voltage
+                  - entity: sensor.fishbucket_sensors_water_ph
+                    name: Water pH
+                  - entity: sensor.fishbucket_sensors_ph_sensor_voltage
+                    name: pH sensor voltage
                   - type: divider
                   - entity: number.fishbucket_sensors_tds_calibration_k
                     name: TDS calibration K
+                  - entity: number.fishbucket_sensors_ph_cal_voltage_7_0
+                    name: pH cal voltage @ 7.0
+                  - entity: number.fishbucket_sensors_ph_cal_voltage_4_0
+                    name: pH cal voltage @ 4.0
               - type: entities
                 title: Outside the tank (BMP280)
                 show_header_toggle: false
@@ -85,3 +101,9 @@ views:
                     name: Air temperature
                   - entity: sensor.fishbucket_sensors_water_tds
                     name: Water TDS
+              - type: history-graph
+                title: pH (24 h)
+                hours_to_show: 24
+                entities:
+                  - entity: sensor.fishbucket_sensors_water_ph
+                    name: Water pH
