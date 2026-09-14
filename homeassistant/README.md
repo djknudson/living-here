@@ -21,6 +21,10 @@ Home Assistant OS on an Intel N97 mini PC (16 GB). Host `homeassistant`
 - `sensor.fishbucket_sensors_water_tds`
 - `sensor.fishbucket_sensors_tds_sensor_voltage` (diagnostic)
 - `number.fishbucket_sensors_tds_calibration_k` (config)
+- `sensor.fishbucket_sensors_air_temperature`
+- `sensor.fishbucket_sensors_air_pressure`
+- `sensor.fishbucket_sensors_water_ph` + `sensor.fishbucket_sensors_ph_sensor_voltage` (no probe wired yet)
+- `number.fishbucket_sensors_ph_cal_voltage_7_0` + `number.fishbucket_sensors_ph_cal_voltage_4_0` (config)
 - `camera.fishbucket_camera`
 
 ## Dashboard (YAML mode)

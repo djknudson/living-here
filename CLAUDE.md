@@ -2,7 +2,8 @@
 
 Home Assistant setup called **Living Here**. First station: **fishbucket**, an
 aquarium monitor for a backyard freshwater tub with goldfish. Status: working
-prototype — temp + TDS + camera all live in Home Assistant.
+prototype — water temp + TDS + air temp/pressure live in Home Assistant and on the e-ink
+panel; camera works but is switched off; pH probe never wired (firmware + dashboard only).
 
 Parent conventions apply: see `~/Development/CLAUDE.md` (Conventional Commits,
 trunk-based direct to `main`, atomic commits, "code like it ships").
